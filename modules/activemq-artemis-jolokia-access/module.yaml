@@ -1,6 +1,6 @@
 schema_version: 1
 
-name: amq.broker77.s2i
+name: activemq.artemis.jolokia.access
 version: '1.0'
 execute:
     - script: install.sh    

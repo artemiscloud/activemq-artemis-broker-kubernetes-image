@@ -1,6 +1,6 @@
-# Red Hat AMQ Broker 7.7.0 OpenShift container image
+# ActiveMQ Artemis broker 2.13.0 OpenShift container image
 
-NOTE: Extends link:https://github.com/jboss-container-images/jboss-amq-7-broker-image[Red Hat AMQ Broker 7.7.0 container image]
+NOTE: Extends link:https://github.com/artemiscloud/activemq-artemis-broker-openshift-image[ActiveMQ Artemis broker 2.13.0 container image]
 
 # License
 

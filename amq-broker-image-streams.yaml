@@ -1,0 +1,29 @@
+kind: List
+apiVersion: v1
+metadata:
+  name: activemq-artemis-image-streams
+  annotations:
+    description: ImageStream definitions for ActiveMQ Artemis Broker Container Image
+    openshift.io/provider-display-name: ActiveMQ Artemis Cloud
+items:
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: activemq-artemis-broker
+    annotations:
+      openshift.io/display-name: ActiveMQ Artemis Broker
+      openshift.io/provider-display-name: ActiveMQ Artemis Cloud
+  spec:
+    lookupPolicy:
+      local: true  
+    tags:
+    - name: 'LATEST'
+      annotations:
+        description: ActiveMQ Artemis Broker image.
+        iconClass: icon-artemis
+        tags: messaging,artemis,xpaas
+        supports: amq:7.7,messaging:7.7
+        version: 'LATEST'
+      from:
+        kind: DockerImage
+        name: quay.io/artemiscloud/amq-broker:7.7

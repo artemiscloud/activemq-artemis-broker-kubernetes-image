@@ -1,20 +1,18 @@
 schema_version: 1
 
-name: "amq-broker-7/amq-broker-77-openshift"
-description: "Red Hat AMQ Broker 7.7.0 OpenShift container image"
-version: "7.7"
-from: "amq-broker-7/amq-broker-77:7.7-4"
+name: "artemiscloud/activemq-artemis-broker-openshift"
+description: "ActiveMQ Artemis OpenShift container image"
+version: "1.0"
+from: "quay.io/artemiscloud/activemq-artemis-broker:latest"
 labels:
-    - name: "com.redhat.component"
-      value: "amq-broker-openshift-container"
     - name: "io.k8s.description"
       value: "A reliable messaging platform that supports standard messaging paradigms for a real-time enterprise."
     - name: "io.k8s.display-name"
-      value: "Red Hat AMQ Broker 7.7.0"
+      value: "ActiveMQ Artemis Broker"
     - name: "maintainer"
       value: "rkieley@redhat.com"
     - name: "io.openshift.tags"
-      value: "messaging,amq,java,jboss,xpaas"
+      value: "messaging,activemq,artemis,java,xpaas"
     - name: "io.openshift.s2i.scripts-url"
       value: "image:///usr/local/s2i"
 envs:
@@ -116,7 +114,7 @@ modules:
           - name: cct_module
             git:
                   url: https://github.com/artemiscloud/cct_module.git
-                  ref: 0.38.0-amq
+                  ref: 0.38.0-artemiscloud
       install:
           - name: dynamic-resources
           - name: os-amq-s2i          
@@ -125,9 +123,9 @@ modules:
           - name: os-logging
           - name: os-amq-permissions
           - name: os-java-jolokia
-          - name: amq.broker77.jolokia.access
-          - name: amq.broker77.launch
-          - name: amq.broker77.s2i
+          - name: activemq.artemis.jolokia.access
+          - name: activemq.artemis.launch
+          - name: activemq.artemis.s2i
           - name: amq.custom.config   
 
 run:

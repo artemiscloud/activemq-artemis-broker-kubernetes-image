@@ -22,8 +22,8 @@ items:
         description: ActiveMQ Artemis Broker image.
         iconClass: icon-artemis
         tags: messaging,artemis,xpaas
-        supports: amq:7.7,messaging:7.7
+        supports: amq:1.0,messaging:1.0
         version: 'LATEST'
       from:
         kind: DockerImage
-        name: quay.io/artemiscloud/amq-broker:7.7
+        name: quay.io/artemiscloud/activemq-artemis-broker-openshift:1.0

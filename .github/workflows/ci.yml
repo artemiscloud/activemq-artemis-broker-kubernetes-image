@@ -1,0 +1,33 @@
+name: CI
+
+env:
+  IMAGE_NAME: activemq-artemis-broker-kubernetes
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install prerequisites
+        run: >
+          sudo apt-get install gcc libkrb5-dev pass &&
+          sudo pip install docker docker-squash cekit odcs[client]        
+
+      - name: Checkout the repo
+        uses: actions/checkout@v2
+
+      - name: Build the image
+        run: "cekit --verbose build docker --tag $IMAGE_NAME:latest"
+
+      - name: Push the image
+        run: >
+          docker login --username=${{ secrets.QUAY_USERNAME }} --password=${{ secrets.QUAY_PASSWORD }} quay.io &&
+          docker tag $IMAGE_NAME:latest quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:dev.latest &&
+          docker push quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:dev.latest

@@ -1,6 +1,6 @@
-# ActiveMQ Artemis broker 2.13.0 OpenShift container image
+# ActiveMQ Artemis broker Kubernetes container image
 
-NOTE: Extends link:https://github.com/artemiscloud/activemq-artemis-broker-openshift-image[ActiveMQ Artemis broker container image]
+NOTE: Extends link:https://github.com/artemiscloud/activemq-artemis-broker-image[ActiveMQ Artemis broker container image]
 
 # License
 

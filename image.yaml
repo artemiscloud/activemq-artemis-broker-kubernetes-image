@@ -2,7 +2,7 @@ schema_version: 1
 
 name: "artemiscloud/activemq-artemis-broker-openshift"
 description: "ActiveMQ Artemis OpenShift container image"
-version: "1.0"
+version: "0.1.0"
 from: "quay.io/artemiscloud/activemq-artemis-broker:0.1.0"
 labels:
     - name: "io.k8s.description"

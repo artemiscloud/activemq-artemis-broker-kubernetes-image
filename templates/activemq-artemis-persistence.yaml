@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Template
 labels:
   template: activemq-artemis-persistence
-  xpaas: 1.0
+  xpaas: '1.0'
 message: A new messaging service has been created in your project. It will handle the protocol(s) "${AMQ_PROTOCOL}". The username/password for accessing the service is ${AMQ_USER}/${AMQ_PASSWORD}.
 metadata:
   annotations:
@@ -15,7 +15,7 @@ metadata:
     template.openshift.io/long-description: >-
       This template defines resources needed to develop a ActiveMQ Artemis Broker 2.13 based application, including a statefulset configuration, using persistent storage.
     template.openshift.io/support-url: 'https://github.com/artemiscloud'    
-    version: 1.0
+    version: '1.0'
   name: activemq-artemis-persistence
 objects:
 - apiVersion: v1

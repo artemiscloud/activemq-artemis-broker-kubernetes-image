@@ -17,18 +17,36 @@ jobs:
     steps:
       - name: Install prerequisites
         run: >
-          sudo apt-get install gcc libkrb5-dev pass &&
+          sudo apt-get install gcc libkrb5-dev &&
           sudo pip install docker docker-squash cekit odcs[client]        
 
       - name: Checkout the repo
         uses: actions/checkout@v2
 
       - name: Build the image
-        run: "cekit --verbose build docker --tag $IMAGE_NAME:latest"
+        run: "cekit --verbose build docker --tag $IMAGE_NAME:dev.latest"
+
+      - name: Checkout the activemq-artemis-operator
+        run: git clone https://github.com/artemiscloud/activemq-artemis-operator.git ${{ runner.temp }}/activemq-artemis-operator
+
+      - name: Execute the test suite
+        uses: artemiscloud/activemq-artemis-operator-test-action@v1
+        with:
+          module: 'gitlab.cee.redhat.com/msgqe/openshift-broker-suite-golang'
+          repository: 'https://github.com/brusdev/activemq-artemis-operator-test-suite.git'
+          ref: 'fix_test_flags'
+          test-packages: 'test/smoke/basic/...'
+          docker-images: 'activemq-artemis-broker-kubernetes:dev.latest'
+          broker-image: 'activemq-artemis-broker-kubernetes:dev.latest'
+          broker-update-image: 'activemq-artemis-broker-kubernetes:dev.latest'
+          operator-deploy-path: '${{ runner.temp }}/activemq-artemis-operator/deploy'
 
       - name: Push the image
         if: ${{ github.event_name == 'push' }}
         run: >
-          docker login --username=${{ secrets.QUAY_USERNAME }} --password=${{ secrets.QUAY_PASSWORD }} quay.io &&
-          docker tag $IMAGE_NAME:latest quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:dev.latest &&
+          export IMAGE_TAG=dev.$(date +%Y%m%d).$(git rev-parse --short "$GITHUB_SHA") &&
+          docker login quay.io --username=${{ secrets.QUAY_USERNAME }} --password-stdin <<< ${{ secrets.QUAY_PASSWORD }} &&
+          docker tag $IMAGE_NAME:dev.latest quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:$IMAGE_TAG &&
+          docker push quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:$IMAGE_TAG &&
+          docker tag $IMAGE_NAME:dev.latest quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:dev.latest &&
           docker push quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:dev.latest

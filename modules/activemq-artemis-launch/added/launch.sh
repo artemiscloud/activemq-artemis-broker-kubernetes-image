@@ -69,6 +69,15 @@ function configureLogging() {
     echo "Configuring logging directory to be ${AMQ_DATA_DIR}/log"
     sed -i 's@${artemis.instance}@'"$AMQ_DATA_DIR"'@' ${instanceDir}/etc/logging.properties
   fi
+  #merge custome logging properties
+  if [[ ${MERGE_BROKER_LOGGING} == "true" && -f "${TUNE_PATH}/ac.logging.properties" ]]; then
+    echo "yacfg logging.properties exists, applying"
+    mergeLoggingProperties "${TUNE_PATH}/ac.logging.properties" "${instanceDir}/etc/logging.properties"
+  fi
+}
+
+function mergeLoggingProperties() {
+  python $AMQ_HOME/conf/amq/loggingprops.py --source "$1" --target "$2"
 }
 
 function configureNetworking() {
@@ -598,7 +607,7 @@ function configure() {
 
     echo "Checking yacfg file under dir: $TUNE_PATH"
 
-    if [ -f "${TUNE_PATH}/broker.xml" ]; then
+    if [[ ${MERGE_BROKER_AS} == "true" && -f "${TUNE_PATH}/broker.xml" ]]; then
         echo "yacfg broker.xml exists."
         updateAddressSettings "${TUNE_PATH}/broker.xml" "${instanceDir}/etc/broker.xml"
     fi

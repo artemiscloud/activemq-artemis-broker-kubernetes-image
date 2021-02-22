@@ -532,7 +532,7 @@ parameters:
   displayName: Image
   name: IMAGE
   required: true
-  value: quay.io/artemiscloud/activemq-artemis-broker-kubernetes:0.2.0
+  value: quay.io/artemiscloud/activemq-artemis-broker-kubernetes:0.2.1
 - description: Name of a secret containing credential data such as usernames and passwords
   displayName: Secret Name
   name: AMQ_CREDENTIAL_SECRET

@@ -619,7 +619,7 @@ parameters:
   displayName: Image
   name: IMAGE
   required: true
-  value: quay.io/artemiscloud/activemq-artemis-broker-kubernetes:0.2.0
+  value: quay.io/artemiscloud/activemq-artemis-broker-kubernetes:0.2.1
 - description: Whether to enable artemis metrics plugin
   displayName: Enable Metrics Plugin
   name: AMQ_ENABLE_METRICS_PLUGIN

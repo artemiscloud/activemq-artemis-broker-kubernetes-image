@@ -8,12 +8,12 @@ metadata:
   annotations:
     description: Application template for ActiveMQ Artemis brokers. This template doesn't feature SSL support.
     iconClass: icon-amq
-    openshift.io/display-name: ActiveMQ Artemis Broker 2.13 Custom Config (Ephemeral, no SSL)
+    openshift.io/display-name: ActiveMQ Artemis Broker 2.17 Custom Config (Ephemeral, no SSL)
     openshift.io/provider-display-name: Apache Artemis
     tags: messaging,amq,xpaas
     template.openshift.io/documentation-url: 'https://github.com/artemiscloud/activemq-artemis-broker-openshift-image'
     template.openshift.io/long-description: >-
-      This template defines resources needed to develop a ActiveMQ Artemis Broker 2.13 based application, including a deployment configuration, using ephemeral (temporary) storage.
+      This template defines resources needed to develop a ActiveMQ Artemis Broker 2.17 based application, including a deployment configuration, using ephemeral (temporary) storage.
     template.openshift.io/support-url: 'https://github.com/artemiscloud'        
     version: '1.0'
   name: activemq-artemis-custom
@@ -292,7 +292,7 @@ parameters:
   displayName: Image
   name: IMAGE
   required: true
-  value: quay.io/artemiscloud/activemq-artemis-broker-kubernetes:0.2.1
+  value: quay.io/artemiscloud/activemq-artemis-broker-kubernetes:0.2.2
 - description: Name of a secret containing credential data such as usernames and passwords
   displayName: Secret Name
   name: AMQ_CREDENTIAL_SECRET

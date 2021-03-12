@@ -8,12 +8,12 @@ metadata:
   annotations:
     description: An example ActiveMQ Artemis Broker application.  This template supports SSL and requires usage of OpenShift secrets.
     iconClass: icon-amq
-    openshift.io/display-name: ActiveMQ Artemis Broker 2.13 (Ephemeral, with SSL)
+    openshift.io/display-name: ActiveMQ Artemis Broker 2.17 (Ephemeral, with SSL)
     openshift.io/provider-display-name: Apache Artemis
     tags: messaging,amq,xpaas
     template.openshift.io/documentation-url: 'https://github.com/artemiscloud/activemq-artemis-broker-openshift-image'
     template.openshift.io/long-description: >-
-      This template defines resources needed to develop a ActiveMQ Artemis Broker 2.13 based application, including a deployment configuration, using ephemeral (temporary) storage and secure communication using SSL.
+      This template defines resources needed to develop a ActiveMQ Artemis Broker 2.17 based application, including a deployment configuration, using ephemeral (temporary) storage and secure communication using SSL.
     template.openshift.io/support-url: 'https://github.com/artemiscloud'    
     version: '1.0'
   name: activemq-artemis-ssl
@@ -427,7 +427,7 @@ parameters:
   displayName: Image
   name: IMAGE
   required: true
-  value: quay.io/artemiscloud/activemq-artemis-broker-kubernetes:0.2.1
+  value: quay.io/artemiscloud/activemq-artemis-broker-kubernetes:0.2.2
 - description: Whether to enable artemis metrics plugin
   displayName: Enable Metrics Plugin
   name: AMQ_ENABLE_METRICS_PLUGIN

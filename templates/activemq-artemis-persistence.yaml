@@ -273,13 +273,8 @@ parameters:
 - description: Broker Image
   displayName: Image
   name: IMAGE
-<<<<<<< HEAD
   required: true
   value: quay.io/artemiscloud/activemq-artemis-broker-kubernetes:0.2.2
-=======
-  required: true
-  value: quay.io/artemiscloud/activemq-artemis-broker-kubernetes:0.2.0
->>>>>>> 92ee05c (Prefix AMQ_CREDENTIAL_SECRET with application name so it allows multiple)
 - description: Name of a secret containing credential data such as usernames and passwords
   displayName: Secret Name
   name: AMQ_CREDENTIAL_SECRET

@@ -38,7 +38,7 @@ jobs:
           docker-images: 'activemq-artemis-broker-kubernetes:dev.latest'
           broker-image: 'activemq-artemis-broker-kubernetes:dev.latest'
           broker-update-image: 'activemq-artemis-broker-kubernetes:dev.latest'
-          operator-deploy-path: '${{ runner.temp }}/activemq-artemis-operator/deploy'
+          operator-deploy-path: 'deploy'
 
       - name: Push the image
         if: ${{ github.event_name == 'push' }}

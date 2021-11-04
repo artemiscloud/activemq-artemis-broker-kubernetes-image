@@ -37,8 +37,6 @@ jobs:
       - name: Execute the test suite
         uses: artemiscloud/activemq-artemis-operator-test-action@v1
         with:
-          repository: 'https://github.com/brusdev/activemq-artemis-operator-test-suite.git'
-          ref: 'dev'
           test-packages: 'test/smoke/basic/...'
           docker-images: 'activemq-artemis-broker-kubernetes:dev.latest'
           broker-image: 'activemq-artemis-broker-kubernetes:dev.latest'

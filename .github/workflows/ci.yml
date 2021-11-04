@@ -18,7 +18,12 @@ jobs:
       - name: Install prerequisites
         run: >
           sudo apt-get install gcc libkrb5-dev &&
-          sudo pip install docker docker-squash cekit odcs[client]        
+          sudo pip install docker docker-squash cekit odcs[client]
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '^1.14.15'
 
       - name: Checkout the repo
         uses: actions/checkout@v2

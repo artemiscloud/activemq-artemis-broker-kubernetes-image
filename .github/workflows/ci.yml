@@ -35,7 +35,7 @@ jobs:
         run: git clone https://github.com/artemiscloud/activemq-artemis-operator.git ${{ runner.temp }}/activemq-artemis-operator
 
       - name: Execute the test suite
-        uses: artemiscloud/activemq-artemis-operator-test-action@v1.2
+        uses: artemiscloud/activemq-artemis-operator-test-action@v1.3
         with:
           test-packages: 'test/smoke/basic/...'
           docker-images: 'activemq-artemis-broker-kubernetes:dev.latest'

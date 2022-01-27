@@ -15,6 +15,6 @@ artifacts:
     url: https://github.com/jboss-openshift/openshift-ping/releases/download/1.2.6.Final/openshift-ping-dns-1.2.6.Final.jar
     md5: 1d4114e8e8681a7d7bd80f38f35d7f44
   - name: netty-tcnative
-    target: netty-tcnative-2.0.42.Final-linux-x86_64-fedora.jar
-    url: https://repo1.maven.org/maven2/io/netty/netty-tcnative/2.0.42.Final/netty-tcnative-2.0.42.Final-linux-x86_64-fedora.jar
-    md5: af9822f61861335fce6971aa0ee64671
+    target: netty-tcnative-2.0.46.Final-linux-x86_64-fedora.jar
+    url: https://repo1.maven.org/maven2/io/netty/netty-tcnative/2.0.46.Final/netty-tcnative-2.0.46.Final-linux-x86_64-fedora.jar
+    md5: 9998cb3509cc1bfd5eb7ec212c2a4710

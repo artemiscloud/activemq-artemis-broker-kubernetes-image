@@ -1,0 +1,69 @@
+name: Update
+
+env:
+  IMAGE_NAME: activemq-artemis-broker-kubernetes
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version, i.e. 1.0.0'
+        required: false
+        default: ''
+        type: string
+      base_image:
+        description: 'Base image'
+        required: false
+        default: 'latest'
+        type: string
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v2
+
+      - name: Set up the repo
+        run: |
+          git config user.name 'ArtemisCloud Bot'
+          git config user.email 'artemiscloudbot@users.noreply.github.com'
+          git push
+
+      - name: Update version
+        if: ${{ github.event.inputs.version != '' }}
+        run: |
+          sed -i "s~^version:.*~version: \"${{ github.event.inputs.version }}\"~g" image.yaml
+          git commit --all --message "Update version to ${{ github.event.inputs.version }}" || echo "nothing to commit"
+
+      - name: Update base image
+        if: ${{ github.event.inputs.base_image != '' }}
+        run: |
+          if [ "${{ github.event.inputs.base_image }}" = "latest" ]; then
+            BASE_IMAGE="quay.io/artemiscloud/activemq-artemis-broker:$(skopeo inspect docker://quay.io/artemiscloud/activemq-artemis-broker:latest | jq -r '.RepoTags[-2]')"
+          else
+            BASE_IMAGE="${{ github.event.inputs.base_image }}"
+          fi
+          sed -i "s~from.*~from: \"${BASE_IMAGE}\"~g" image.yaml
+          git commit --all --message "Update base image to ${BASE_IMAGE}" || echo "nothing to commit"
+
+      - name: Update netty-tcnative
+        run: |
+          BASE_IMAGE="$(grep -Po -m 1 '(?<=^from: ")[^"]+' image.yaml)"
+          APACHE_ARTEMIS_VERSION=$(skopeo inspect docker://${BASE_IMAGE} | grep -Po '(?<=APACHE_ARTEMIS_VERSION=)[^"]*')
+          wget -O netty-pom.xml "https://raw.githubusercontent.com/apache/activemq-artemis/${APACHE_ARTEMIS_VERSION}/pom.xml"
+          NETTY_TCNATIVE_VERSION=$(grep -Po '(?<=tcnative.version>)[^<]+' netty-pom.xml)
+          NETTY_TCNATIVE_URL="https://repo1.maven.org/maven2/io/netty/netty-tcnative/${NETTY_TCNATIVE_VERSION}/netty-tcnative-${NETTY_TCNATIVE_VERSION}-linux-x86_64-fedora.jar"
+          NETTY_TCNATIVE_TARGET=$(basename ${NETTY_TCNATIVE_URL})
+          wget -O netty-tcnative-linux-x86_64-fedora.jar "${NETTY_TCNATIVE_URL}"
+          NETTY_TCNATIVE_MD5=($(md5sum netty-tcnative-linux-x86_64-fedora.jar))
+          PREV_NETTY_TCNATIVE_URL=$(sed -n '/name: netty-tcnative/,$p' modules/activemq-artemis-launch/module.yaml | grep -Pom 1 'url:.*')
+          PREV_NETTY_TCNATIVE_MD5=$(sed -n '/name: netty-tcnative/,$p' modules/activemq-artemis-launch/module.yaml | grep -Pom 1 'md5:.*')
+          PREV_NETTY_TCNATIVE_TARGET=$(sed -n '/name: netty-tcnative/,$p' modules/activemq-artemis-launch/module.yaml | grep -Pom 1 'target:.*')
+          sed -i -e "s~${PREV_NETTY_TCNATIVE_TARGET}~target: ${NETTY_TCNATIVE_TARGET}~" -e "s~${PREV_NETTY_TCNATIVE_URL}~url: ${NETTY_TCNATIVE_URL}~" -e "s~${PREV_NETTY_TCNATIVE_MD5}~md5: ${NETTY_TCNATIVE_MD5}~" modules/activemq-artemis-launch/module.yaml
+          git commit --all --message "Upgrade netty-tcnative to ${NETTY_TCNATIVE_VERSION}" || echo "Nothing to commit"
+
+      - name: Push commits
+        run: |
+          git push

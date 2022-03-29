@@ -7,7 +7,7 @@ execute:
 
 artifacts:
   - name: netty-tcnative
-    target: netty-tcnative-2.0.46.Final-linux-x86_64-fedora.jar
-    url: https://repo1.maven.org/maven2/io/netty/netty-tcnative/2.0.46.Final/netty-tcnative-2.0.46.Final-linux-x86_64-fedora.jar
-    md5: 9998cb3509cc1bfd5eb7ec212c2a4710
+    target: netty-tcnative-2.0.50.Final-linux-x86_64-fedora.jar
+    url: https://repo1.maven.org/maven2/io/netty/netty-tcnative/2.0.50.Final/netty-tcnative-2.0.50.Final-linux-x86_64-fedora.jar
+    md5: 4d0b1bc37d9a1fedc18800783617e13f
 

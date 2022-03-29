@@ -7,6 +7,13 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      update_release_tag:
+        description: 'Update release tag'
+        required: true
+        default: false
+        type: boolean
 
 jobs:
   build:
@@ -16,16 +23,35 @@ jobs:
       - name: Install prerequisites
         run: >
           sudo apt-get install gcc libkrb5-dev pass &&
-          sudo pip install docker docker-squash cekit odcs[client]        
+          sudo pip install docker docker-squash cekit odcs[client]
       - name: Checkout the repo
         uses: actions/checkout@v2
+
+      - name: Check release tag
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          git fetch --tags
+          RELEASE_TAG="v$(grep -Po -m 1 '(?<=^version: ")[^"]+' image.yaml)"
+          if [ "${{ github.event.inputs.update_release_tag}}" = "true" ]; then
+            GIT_OPTIONS='--force'
+            GIT_TAG=''
+          else
+            GIT_OPTIONS=''
+            GIT_TAG=$(git describe --exact-match --tags || true)
+          fi
+          if [[ ! $GIT_TAG =~ ^$RELEASE_TAG.*$ ]]; then
+            git config user.name 'ArtemisCloud Bot'
+            git config user.email 'artemiscloudbot@users.noreply.github.com'
+            git tag -a ${RELEASE_TAG} -m ${RELEASE_TAG} ${GIT_OPTIONS}
+            git push origin $RELEASE_TAG ${GIT_OPTIONS}
+          fi
 
       - name: Build the image
         run: "cekit --verbose build docker --tag $IMAGE_NAME:latest"
 
       - name: Push the image
         run: >
-          export IMAGE_TAG=${GITHUB_REF#refs/tags/v} &&
+          RELEASE_TAG="$(git describe --exact-match --tags)" && IMAGE_TAG=${RELEASE_TAG#v} &&
           docker login --username=${{ secrets.QUAY_USERNAME }} --password=${{ secrets.QUAY_PASSWORD }} quay.io &&
           docker tag $IMAGE_NAME:latest quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:$IMAGE_TAG &&
           docker push quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:$IMAGE_TAG &&

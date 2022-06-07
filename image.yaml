@@ -72,6 +72,9 @@ envs:
   - name: AMQ_JOLOKIA_AGENT_PASSWORD
     description: The jolokia agent password used for authentication (AMQ_JOLOKIA_AGENT_USER is then required, too)
     example: "jolokiapassword"
+  - name: AMQ_JOLOKIA_AGENT_OPTS
+    description: The jolokia agent options
+    example: "realm=activemq"
   - name: AMQ_ENABLE_MANAGEMENT_RBAC
     description: Enable Management RBAC
     example: "true"

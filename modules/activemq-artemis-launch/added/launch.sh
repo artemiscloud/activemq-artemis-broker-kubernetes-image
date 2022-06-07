@@ -267,10 +267,19 @@ function configureJolokiaJVMAgent() {
   instanceDir=$1
   if [ "$AMQ_ENABLE_JOLOKIA_AGENT" = "true" ]; then
     echo "Enable jolokia jvm agent"
+
+    if [ -z ${AMQ_JOLOKIA_AGENT_OPTS} ] && [ -f "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt" ]; then
+      if [ -f "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt" ]; then
+        AMQ_JOLOKIA_AGENT_OPTS='realm=activemq,caCert=/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt,clientPrincipal.1=cn=system:master-proxy,clientPrincipal.2=cn=hawtio-online.hawtio.svc,clientPrincipal.3=cn=fuse-console.fuse.svc'
+      else
+        AMQ_JOLOKIA_AGENT_OPTS='realm=activemq,clientPrincipal.1=cn=system:master-proxy,clientPrincipal.2=cn=hawtio-online.hawtio.svc,clientPrincipal.3=cn=fuse-console.fuse.svc'
+      fi
+    fi
+
     export AB_JOLOKIA_USER=$AMQ_JOLOKIA_AGENT_USER
     export AB_JOLOKIA_PASSWORD_RANDOM=false
     export AB_JOLOKIA_PASSWORD=$AMQ_JOLOKIA_AGENT_PASSWORD
-    export AB_JOLOKIA_OPTS="realm=activemq,caCert=/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt,clientPrincipal.1=cn=system:master-proxy,clientPrincipal.2=cn=hawtio-online.hawtio.svc,clientPrincipal.3=cn=fuse-console.fuse.svc"
+    export AB_JOLOKIA_OPTS="${AMQ_JOLOKIA_AGENT_OPTS}"
     JOLOKIA_OPTS="$(/opt/jolokia/jolokia-opts)"
 
     echo '' >> ${instanceDir}/etc/artemis.profile

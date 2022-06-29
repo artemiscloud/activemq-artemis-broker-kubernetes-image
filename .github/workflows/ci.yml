@@ -2,6 +2,7 @@ name: CI
 
 env:
   IMAGE_NAME: activemq-artemis-broker-kubernetes
+  S2I_RELEASE_URL: https://github.com/openshift/source-to-image/releases/download/v1.3.1/source-to-image-v1.3.1-a5a77147-linux-amd64.tar.gz
 
 on:
   push:
@@ -17,8 +18,12 @@ jobs:
     steps:
       - name: Install prerequisites
         run: >
+          mkdir -p $HOME/.local/bin &&
+          echo "$HOME/.local/bin" >> $GITHUB_PATH &&
           sudo apt-get install gcc libkrb5-dev &&
-          sudo pip install docker docker-squash cekit odcs[client]
+          sudo pip install docker docker-squash cekit odcs[client] behave lxml &&
+          wget -O source-to-image.tar.gz $S2I_RELEASE_URL &&
+          tar -C $HOME/.local/bin -xvf source-to-image.tar.gz
 
       - name: Checkout the repo
         uses: actions/checkout@v2
@@ -28,6 +33,7 @@ jobs:
 
       - name: Check the image
         run: >
+          cekit test --image $IMAGE_NAME:dev.latest behave &&
           export CONTAINER_ID=$(docker run --detach --env AMQ_USER=admin --env AMQ_PASSWORD=admin $IMAGE_NAME:dev.latest) &&
           echo CONTAINER_ID=$CONTAINER_ID && sleep 3 &&
           export CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_ID) &&

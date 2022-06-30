@@ -9,9 +9,9 @@ on:
       - 'v*'
   workflow_dispatch:
     inputs:
-      update_release_tag:
-        description: 'Update release tag'
-        required: true
+      trigger_children:
+        description: 'Trigger children'
+        required: false
         default: false
         type: boolean
 
@@ -27,23 +27,18 @@ jobs:
       - name: Checkout the repo
         uses: actions/checkout@v2
 
-      - name: Check release tag
+      - name: Create release tag
         if: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           git fetch --tags
+          HEAD_COMMIT="$(git rev-parse HEAD)"
           RELEASE_TAG="v$(grep -Po -m 1 '(?<=^version: ")[^"]+' image.yaml)"
-          if [ "${{ github.event.inputs.update_release_tag}}" = "true" ]; then
-            GIT_OPTIONS='--force'
-            GIT_TAG=''
-          else
-            GIT_OPTIONS=''
-            GIT_TAG=$(git describe --exact-match --tags || true)
-          fi
-          if [[ ! $GIT_TAG =~ ^$RELEASE_TAG.*$ ]]; then
-            git config user.name 'ArtemisCloud Bot'
-            git config user.email 'artemiscloudbot@users.noreply.github.com'
-            git tag -a ${RELEASE_TAG} -m ${RELEASE_TAG} ${GIT_OPTIONS}
-            git push origin $RELEASE_TAG ${GIT_OPTIONS}
+          RELEASE_TAG_COMMIT="$(git rev-list -n 1 ${RELEASE_TAG} || true)"
+          if [ "$RELEASE_TAG_COMMIT" != "$HEAD_COMMIT" ]; then
+            git config user.name 'artemiscloud-bot'
+            git config user.email 'bot@artemiscloud.io'
+            git tag -a ${RELEASE_TAG} -m ${RELEASE_TAG} --force
+            git push origin $RELEASE_TAG --force
           fi
 
       - name: Build the image
@@ -57,3 +52,25 @@ jobs:
           docker push quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:$IMAGE_TAG &&
           docker tag $IMAGE_NAME:latest quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:latest &&
           docker push quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:latest
+
+      - name: Trigger children
+        if: ${{ inputs.trigger_children }}
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.BOT_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: 'activemq-artemis-broker-init-image',
+              workflow_id: 'update.yml',
+              ref: 'main',
+              inputs: {
+                version: '*.*.+',
+                update_version: 'true',
+                base_image: 'latest',
+                update_base_image: 'true',
+                yacfg_version: 'latest',
+                update_yacfg_version: 'true',
+                trigger_release: 'all'
+              }
+            });

@@ -680,6 +680,8 @@ function configure() {
       injectMetricsPlugin ${instanceDir}
     fi
 
+    sed -i 's/<web/<web customizer="org.eclipse.jetty.server.ForwardedRequestCustomizer"/' ${instanceDir}/etc/bootstrap.xml
+
     $AMQ_HOME/bin/configure_s2i_files.sh ${instanceDir}
     $AMQ_HOME/bin/configure_custom_config.sh ${instanceDir}
 

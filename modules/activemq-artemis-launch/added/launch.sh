@@ -27,7 +27,7 @@ JAVA_OPTS="-Djava.net.preferIPv4Stack=true ${JAVA_OPTS}"
 if [ "$AMQ_ENABLE_JOLOKIA_AGENT" = "true" ]; then
   echo "Define jolokia jvm agent options"
 
-  if [ -z ${AMQ_JOLOKIA_AGENT_OPTS} ] && [ -f "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt" ]; then
+  if [ -z ${AMQ_JOLOKIA_AGENT_OPTS} ]; then
     if [ -f "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt" ]; then
       AMQ_JOLOKIA_AGENT_OPTS='realm=activemq,caCert=/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt,clientPrincipal.1=cn=system:master-proxy,clientPrincipal.2=cn=hawtio-online.hawtio.svc,clientPrincipal.3=cn=fuse-console.fuse.svc'
     else

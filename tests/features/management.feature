@@ -17,7 +17,6 @@ Feature: Management
         | port     | 8161  |
         | path     | /console/jolokia/exec/org.apache.activemq.artemis:broker="broker"/addUser/guest/guest/guest/true |
         | expected_status_code | 200 |
-        | expected_phrase | "status":200 |
     Then check that page is served
         | property | value |
         | username | guest |
@@ -27,6 +26,6 @@ Feature: Management
         | expected_status_code | 200 |
         | expected_phrase | "status":<response status> |
     Examples:
-        | status   | env value | response status | management file assert                                    |
-        | enabled  | true      | 403             | not contain <entry domain="org.apache.activemq.artemis"/> |
-        | disabled | false     | 200             | contain <entry domain="org.apache.activemq.artemis"/>     |
+        | status   | env value | response status | management file assert          |
+        | enabled  | true      | 403             | not contain <entry domain="*"/> |
+        | disabled | false     | 200             | contain <entry domain="*"/>     |

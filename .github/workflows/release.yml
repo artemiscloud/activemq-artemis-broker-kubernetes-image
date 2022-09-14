@@ -51,7 +51,10 @@ jobs:
           docker tag $IMAGE_NAME:latest quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:$IMAGE_TAG &&
           docker push quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:$IMAGE_TAG &&
           docker tag $IMAGE_NAME:latest quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:latest &&
-          docker push quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:latest
+          docker push quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:latest &&
+          ARTEMIS_TAG="artemis.$(docker image inspect $IMAGE_NAME:latest | grep -Po -m 1 '(?<=APACHE_ARTEMIS_VERSION=)[^"]*')" &&
+          docker tag $IMAGE_NAME:latest quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:$ARTEMIS_TAG &&
+          docker push quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:$ARTEMIS_TAG
 
       - name: Trigger children
         if: ${{ inputs.trigger_children }}

@@ -77,14 +77,6 @@ function configureUserAuthentication() {
   fi
 }
 
-function configureLogging() {
-  instanceDir=$1
-  if [ "$AMQ_DATA_DIR_LOGGING" = "true" ]; then
-    echo "Configuring logging directory to be ${AMQ_DATA_DIR}/log"
-    sed -i 's@${artemis.instance}@'"$AMQ_DATA_DIR"'@' ${instanceDir}/etc/logging.properties
-  fi
-}
-
 function configureNetworking() {
   if [ "$AMQ_CLUSTERED" = "true" ]; then
     echo "Broker will be clustered"
@@ -315,6 +307,14 @@ function checkBeforeRun() {
       echo "Need to inject Prometheus plugin"
       injectMetricsPlugin ${instanceDir}
     fi
+  fi
+
+  if [[ "${JAVA_ARGS_APPEND}" == *"-Dlog4j2.configurationFile"* ]]; then
+    echo "There is a custom logger configuration defined in JAVA_ARGS_APPEND: ${JAVA_ARGS_APPEND}"
+  else
+    echo "Using default logging configuration(console only)"
+    defaultLoggingConfigFile=${instanceDir}/etc/log4j2.properties
+    sed -i "s/rootLogger = INFO, console, log_file/rootLogger = INFO, console/g" $defaultLoggingConfigFile
   fi
 }
 
@@ -667,7 +667,6 @@ function configure() {
     updateAcceptorsForPrefixing ${instanceDir}
     appendAcceptorsFromEnv ${instanceDir}
     appendConnectorsFromEnv ${instanceDir}
-    configureLogging ${instanceDir}
     configureJAVA_ARGSMemory ${instanceDir}
     configureJolokiaJVMAgent ${instanceDir}
 
@@ -684,7 +683,6 @@ function configure() {
 
     $AMQ_HOME/bin/configure_s2i_files.sh ${instanceDir}
     $AMQ_HOME/bin/configure_custom_config.sh ${instanceDir}
-
   fi
 }
 

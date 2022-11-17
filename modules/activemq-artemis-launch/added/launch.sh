@@ -296,13 +296,17 @@ function configureJolokiaJVMAgent() {
 function injectMetricsPlugin() {
   instanceDir=$1
   echo "Adding artemis metrics plugin"
-  sed -i "s/^\([[:blank:]]*\)<\\/core>/\1\1<metrics> <plugin class-name=\"org.apache.activemq.artemis.core.server.metrics.plugins.ArtemisPrometheusMetricsPlugin\"\\/> <\\/metrics>\\n\1<\\/core>/" $instanceDir/etc/broker.xml
+  sed -i "s/^\([[:blank:]]*\)<\\/core>/\1\1<metrics> <plugin class-name=\"com.redhat.amq.broker.core.server.metrics.plugins.ArtemisPrometheusMetricsPlugin\"\\/> <\\/metrics>\\n\1<\\/core>/" $instanceDir/etc/broker.xml
+
+  if ! grep -q 'metrics' $instanceDir/etc/bootstrap.xml; then
+    sed -i 's~</binding>~<app url="metrics" war="metrics.war"/></binding>~' $instanceDir/etc/bootstrap.xml
+  fi
 }
 
 function checkBeforeRun() {
   instanceDir=$1
   if [ "$AMQ_ENABLE_METRICS_PLUGIN" = "true" ]; then
-    pluginStr="org.apache.activemq.artemis.core.server.metrics.plugins.ArtemisPrometheusMetricsPlugin"
+    pluginStr="com.redhat.amq.broker.core.server.metrics.plugins.ArtemisPrometheusMetricsPlugin"
     grep -q "$pluginStr" ${instanceDir}/etc/broker.xml
     result=$?
     if [[ $result == 0 ]]; then

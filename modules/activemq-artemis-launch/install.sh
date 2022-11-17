@@ -9,6 +9,14 @@ DEST=$AMQ_HOME
 mkdir -p ${DEST}
 mkdir -p ${DEST}/conf/
 
+if [ ! -f "$AMQ_HOME/lib/artemis-prometheus-metrics-plugin*.jar" ]; then
+    cp $SOURCES_DIR/artemis-prometheus-metrics-plugin*.jar $AMQ_HOME/lib/
+fi
+
+if [ ! -f "$AMQ_HOME/web/metrics.war" ]; then
+    cp $SOURCES_DIR/artemis-prometheus-metrics-plugin-servlet*.war $AMQ_HOME/web/metrics.war
+fi
+
 cp -p ${SOURCES_DIR}/netty-tcnative*.jar \
   ${DEST}/lib
 

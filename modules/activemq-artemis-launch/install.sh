@@ -9,12 +9,12 @@ DEST=$AMQ_HOME
 mkdir -p ${DEST}
 mkdir -p ${DEST}/conf/
 
-if [ ! -f "$AMQ_HOME/lib/artemis-prometheus-metrics-plugin*.jar" ]; then
-    cp $SOURCES_DIR/artemis-prometheus-metrics-plugin*.jar $AMQ_HOME/lib/
+if ! ls $AMQ_HOME/lib/artemis-prometheus-metrics-plugin*.jar; then
+  curl -L --output "$AMQ_HOME/lib/artemis-prometheus-metrics-plugin-2.0.0.jar" https://github.com/rh-messaging/artemis-prometheus-metrics-plugin/releases/download/v2.0.0/artemis-prometheus-metrics-plugin-2.0.0.jar
 fi
 
-if [ ! -f "$AMQ_HOME/web/metrics.war" ]; then
-    cp $SOURCES_DIR/artemis-prometheus-metrics-plugin-servlet*.war $AMQ_HOME/web/metrics.war
+if ! ls $AMQ_HOME/web/metrics.war; then
+  curl -L --output "$AMQ_HOME/web/metrics.war" https://github.com/rh-messaging/artemis-prometheus-metrics-plugin/releases/download/v2.0.0/artemis-prometheus-metrics-plugin-servlet-2.0.0.war
 fi
 
 cp -p ${SOURCES_DIR}/netty-tcnative*.jar \

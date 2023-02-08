@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build the image
-        run: "cekit --verbose build docker --tag $IMAGE_NAME:dev.latest"
+        run: "cekit --verbose build --overrides \"{'labels': [{'name': 'quay.expires-after', 'value': '90d'}, {'name': 'git-sha', 'value': '$GITHUB_SHA'}]}\" docker --tag $IMAGE_NAME:dev.latest"
 
       - name: Check the image
         run: >

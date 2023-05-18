@@ -10,6 +10,17 @@ on:
   pull_request:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      snapshot:
+        description: 'Snapshot'
+        required: false
+        default: false
+        type: boolean
+      trigger_children:
+        description: 'Trigger children'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   build:
@@ -27,6 +38,12 @@ jobs:
 
       - name: Checkout the repo
         uses: actions/checkout@v2
+
+      - name: Update base image
+        if: ${{ inputs.snapshot }}
+        run: |
+          BASE_IMAGE="quay.io/${{ secrets.QUAY_NAMESPACE }}/activemq-artemis-broker@$(skopeo inspect docker://quay.io/${{ secrets.QUAY_NAMESPACE }}/activemq-artemis-broker:snapshot | jq -r '.Digest')"
+          sed -i "s~from.*~from: \"${BASE_IMAGE}\"~g" image.yaml
 
       - name: Build the image
         run: "cekit --verbose build --overrides \"{'labels': [{'name': 'quay.expires-after', 'value': '90d'}, {'name': 'git-sha', 'value': '$GITHUB_SHA'}]}\" docker --tag $IMAGE_NAME:dev.latest"
@@ -51,3 +68,27 @@ jobs:
           docker push quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:$IMAGE_TAG &&
           docker tag $IMAGE_NAME:dev.latest quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:dev.latest &&
           docker push quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:dev.latest
+
+      - name: Push the snapshot image
+        if: ${{ inputs.snapshot }}
+        run: >
+          docker login --username=${{ secrets.QUAY_USERNAME }} --password=${{ secrets.QUAY_PASSWORD }} quay.io &&
+          docker tag $IMAGE_NAME:dev.latest quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:snapshot &&
+          docker push quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:snapshot
+
+      - name: Trigger children
+        if: ${{ inputs.trigger_children }}
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.BOT_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: 'activemq-artemis-broker-init-image',
+              workflow_id: 'ci.yml',
+              ref: 'main',
+              inputs: {
+                snapshot: '${{ inputs.snapshot }}',
+                trigger_children: 'true'
+              }
+            });

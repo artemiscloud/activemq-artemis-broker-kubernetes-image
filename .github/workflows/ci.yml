@@ -45,36 +45,37 @@ jobs:
           BASE_IMAGE="quay.io/${{ secrets.QUAY_NAMESPACE }}/activemq-artemis-broker@$(skopeo inspect docker://quay.io/${{ secrets.QUAY_NAMESPACE }}/activemq-artemis-broker:snapshot | jq -r '.Digest')"
           sed -i "s~from.*~from: \"${BASE_IMAGE}\"~g" image.yaml
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
       - name: Build the image
-        run: "cekit --verbose build --overrides \"{'labels': [{'name': 'quay.expires-after', 'value': '90d'}, {'name': 'git-sha', 'value': '$GITHUB_SHA'}]}\" docker --tag $IMAGE_NAME:dev.latest"
+        run: |
+          cekit --verbose build --dry-run --overrides "{'labels': [{'name': 'quay.expires-after', 'value': '90d'}, {'name': 'git-sha', 'value': '$GITHUB_SHA'}]}" podman
+          podman build --no-cache --platform linux/amd64 --platform linux/arm64 --manifest $IMAGE_NAME:dev.latest ./target/image
 
       - name: Check the image
-        run: >
-          cekit test --image $IMAGE_NAME:dev.latest behave &&
-          export CONTAINER_ID=$(docker run --detach --env AMQ_USER=admin --env AMQ_PASSWORD=admin $IMAGE_NAME:dev.latest) &&
-          echo CONTAINER_ID=$CONTAINER_ID && sleep 3 &&
-          export CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_ID) &&
-          echo CONTAINER_IP=$CONTAINER_IP &&
-          docker cp $CONTAINER_ID:/opt/amq ./ &&
-          ./amq/bin/artemis check queue --name TEST --produce 1000 --browse 1000 --consume 1000 --user admin --password admin --url tcp://$CONTAINER_IP:61616 &&
-          docker kill $CONTAINER_ID
+        run: |
+          CONTAINER_ID=$(podman run --detach --network=host --env AMQ_USER=admin --env AMQ_PASSWORD=admin $IMAGE_NAME:dev.latest)
+          echo CONTAINER_ID=$CONTAINER_ID && sleep 3
+          CONTAINER_IP=$(hostname -I | cut -f 1 -d ' ')
+          echo CONTAINER_IP=$CONTAINER_IP
+          podman cp $CONTAINER_ID:/opt/amq ./
+          ./amq/bin/artemis check queue --name TEST --produce 1000 --browse 1000 --consume 1000 --user admin --password admin --url tcp://$CONTAINER_IP:61616
+          podman kill $CONTAINER_ID
 
-      - name: Push the image
+      - name: Push the dev image
         if: ${{ github.event_name == 'push' }}
-        run: >
-          export IMAGE_TAG=dev.$(date +%Y%m%d).$(git rev-parse --short "$GITHUB_SHA") &&
-          docker login quay.io --username=${{ secrets.QUAY_USERNAME }} --password-stdin <<< ${{ secrets.QUAY_PASSWORD }} &&
-          docker tag $IMAGE_NAME:dev.latest quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:$IMAGE_TAG &&
-          docker push quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:$IMAGE_TAG &&
-          docker tag $IMAGE_NAME:dev.latest quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:dev.latest &&
-          docker push quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:dev.latest
+        run: |
+          IMAGE_TAG=dev.$(date +%Y%m%d).$(git rev-parse --short "$GITHUB_SHA")
+          podman login --username=${{ secrets.QUAY_USERNAME }} --password=${{ secrets.QUAY_PASSWORD }} quay.io
+          podman manifest push $IMAGE_NAME:dev.latest docker://quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:dev.latest
+          podman manifest push $IMAGE_NAME:dev.latest docker://quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:$IMAGE_TAG
 
       - name: Push the snapshot image
-        if: ${{ inputs.snapshot }}
-        run: >
-          docker login --username=${{ secrets.QUAY_USERNAME }} --password=${{ secrets.QUAY_PASSWORD }} quay.io &&
-          docker tag $IMAGE_NAME:dev.latest quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:snapshot &&
-          docker push quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:snapshot
+        if: ${{ github.event_name == 'schedule' || inputs.snapshot }}
+        run: |
+          podman login --username=${{ secrets.QUAY_USERNAME }} --password=${{ secrets.QUAY_PASSWORD }} quay.io
+          podman manifest push $IMAGE_NAME:dev.latest docker://quay.io/${{ secrets.QUAY_NAMESPACE }}/$IMAGE_NAME:snapshot
 
       - name: Trigger children
         if: ${{ inputs.trigger_children }}

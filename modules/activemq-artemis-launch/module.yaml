@@ -11,18 +11,18 @@ artifacts:
     url: https://repo1.maven.org/maven2/io/netty/netty-tcnative-classes/2.0.61.Final/netty-tcnative-classes-2.0.61.Final.jar
     md5: 8f3edcd3825d2aedf3ae6332bd7ff039
   - name: netty-tcnative-0
-    target: netty-tcnative-2.0.61.Final-linux-x86_64.jar
-    url: https://repo1.maven.org/maven2/io/netty/netty-tcnative/2.0.61.Final/netty-tcnative-2.0.61.Final-linux-x86_64.jar
-    md5: 36e9b9eeeb7137494358abc30aeeb141
+    target: netty-tcnative-boringssl-static-2.0.61.Final-linux-x86_64.jar
+    url: https://repo1.maven.org/maven2/io/netty/netty-tcnative-boringssl-static/2.0.61.Final/netty-tcnative-boringssl-static-2.0.61.Final-linux-x86_64.jar
+    md5: ab03d5d83359dbadeadc04c00d413b42
   - name: netty-tcnative-1
-    target: netty-tcnative-2.0.61.Final-linux-x86_64-fedora.jar
-    url: https://repo1.maven.org/maven2/io/netty/netty-tcnative/2.0.61.Final/netty-tcnative-2.0.61.Final-linux-x86_64-fedora.jar
-    md5: ab7eba408c7e9b974242c4ccc6ad905f
+    target: netty-tcnative-boringssl-static-2.0.61.Final-linux-aarch_64.jar
+    url: https://repo1.maven.org/maven2/io/netty/netty-tcnative-boringssl-static/2.0.61.Final/netty-tcnative-boringssl-static-2.0.61.Final-linux-aarch_64.jar
+    md5: 8745bf50ba9924672bda4183bb60d30f
   - name: netty-tcnative-2
-    target: netty-tcnative-2.0.61.Final-linux-aarch_64-fedora.jar
-    url: https://repo1.maven.org/maven2/io/netty/netty-tcnative/2.0.61.Final/netty-tcnative-2.0.61.Final-linux-aarch_64-fedora.jar
-    md5: 07902e86bdc5ea52046b96f40db6467e
+    target: netty-tcnative-boringssl-static-2.0.61.Final-osx-x86_64.jar
+    url: https://repo1.maven.org/maven2/io/netty/netty-tcnative-boringssl-static/2.0.61.Final/netty-tcnative-boringssl-static-2.0.61.Final-osx-x86_64.jar
+    md5: 8a8684186d4be9f91c930f81684289e3
   - name: netty-tcnative-3
-    target: netty-tcnative-2.0.61.Final-osx-x86_64.jar
-    url: https://repo1.maven.org/maven2/io/netty/netty-tcnative/2.0.61.Final/netty-tcnative-2.0.61.Final-osx-x86_64.jar
-    md5: cba65a30abbef7ae74988593d0c1d6b9
+    target: netty-tcnative-boringssl-static-2.0.61.Final-windows-x86_64.jar
+    url: https://repo1.maven.org/maven2/io/netty/netty-tcnative-boringssl-static/2.0.61.Final/netty-tcnative-boringssl-static-2.0.61.Final-windows-x86_64.jar
+    md5: edd5eafc8d0d623febd96f30a48bdde3

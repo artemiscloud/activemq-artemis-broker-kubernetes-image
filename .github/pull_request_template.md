@@ -1,9 +1,17 @@
+# Pull Request
+
 Thanks for submitting your Pull Request!
+
+**Description:**
+A clear and concise description of the changes
+
+**Related issue:**
+The link to the issue
 
 Please make sure your PR meets the following requirements:
 
-- [ ] Pull Request title is properly formatted: `[CLOUD-XYA] Subject`
-- [ ] Pull Request contains link to the JIRA issue
+- [ ] Pull Request title is properly formatted: `[#ISSUE-NUMBER] Subject`
+- [ ] Pull Request contains link to the issue: `#31` or `Closes #31`
 - [ ] Pull Request contains description of the issue
 - [ ] Pull Request does not include fixes for issues other than the main ticket
 - [ ] Attached commits represent units of work and are properly formatted

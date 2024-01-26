@@ -5,16 +5,10 @@ function log() {
   echo "[$logtime]-[drain.sh] $1"
 }
 
-CURL_ERR="curl-error"
+HAVE_JOLOKIA_PROBLEM="false"
 
 function jolokia_read() {
-  CURL_FAILURE=""
   CURL_RESULT=$(curl -s -G -k -H "Origin: http://localhost" http://${AMQ_USER}:${AMQ_PASSWORD}@${BROKER_HOST}:8161/console/jolokia/read/org.apache.activemq.artemis:broker=%22${AMQ_NAME}%22${1})
-  curl_status=$(echo $CURL_RESULT | jq -r '.status')
-  if [[ ${curl_status} != "200" ]]; then
-    CURL_FAILURE=${CURL_ERR}
-    HAVE_JOLOKIA_PROBLEM="true"
-  fi
   echo $CURL_RESULT
 }
 
@@ -26,9 +20,11 @@ function get_address_message_count() {
 
   # checking out address routing type
   R_RoutingTypes=$(jolokia_read ",address=%22${target_address}%22,component=addresses/RoutingTypes")
-  if [[ "${CURL_FAILURE}" == "${CURL_ERR}" ]]; then
-    log "failed to get message count on ${target_address}"
-    log "response: ${R_RoutingTypes}"
+  log "get routing types response: ${R_RoutingTypes}"
+
+  curl_status=$(echo $R_RoutingTypes | jq -r '.status')
+  if [[ ${curl_status} != "200" ]]; then
+    HAVE_JOLOKIA_PROBLEM="true"
     return
   fi
 
@@ -38,11 +34,15 @@ function get_address_message_count() {
   log "address ${target_address} routing type is ${routingType}"
 
   R_AllQueueNames=$(jolokia_read ",address=%22${target_address}%22,component=addresses/AllQueueNames")
-  if [[ "${CURL_FAILURE}" == "${CURL_ERR}" ]]; then
-    log "failed to get message count on ${target_address}"
-    log "response: ${R_AllQueueNames}"
+  log "response: ${R_AllQueueNames}"
+
+  curl_status=$(echo $R_AllQueueNames | jq -r '.status')
+  if [[ ${curl_status} != "200" ]]; then
+    log "failed to get queues on ${target_address}"
+    HAVE_JOLOKIA_PROBLEM="true"
     return
   fi
+
   AllQueueNames=($(echo $R_AllQueueNames | jq -r '.value[]'))
 
   for queue in "${AllQueueNames[@]}"
@@ -50,29 +50,58 @@ function get_address_message_count() {
     log "checking queue ${queue} on address ${target_address}"
     # queue temporary
     R_QueueTemp=$(jolokia_read ",address=%22${target_address}%22,component=addresses,queue=%22${queue}%22,routing-type=%22${routingType}%22,subcomponent=queues/Temporary")
-    if [[ "${CURL_FAILURE}" == "${CURL_ERR}" ]]; then
-      log "cannot get Temporary attribute of queue ${queue}"
-      log "response: ${R_QueueTemp}"
-      return
+    log "read queue temp response: ${R_QueueTemp}"
+
+    curl_status=$(echo $R_QueueTemp | jq -r '.status')
+    if [[ ${curl_status} != "200" ]]; then
+      log "failed to get temp attribute on ${queue}"
+      if [[ ${routingType} == "anycast" ]]; then
+        routingType="multicast"
+      else
+        routingType="anycast"
+      fi
+      log "retry with a different routingType $routingType"
+      R_QueueTemp=$(jolokia_read ",address=%22${target_address}%22,component=addresses,queue=%22${queue}%22,routing-type=%22${routingType}%22,subcomponent=queues/Temporary")
+      log "read queue temp response: ${R_QueueTemp}"
+      curl_status=$(echo $R_QueueTemp | jq -r '.status')
+      if [[ ${curl_status} != "200" ]]; then
+        error_type=$(echo $R_QueueTemp | jq -r '.error_type')
+        if [[ ${error_type} != "javax.management.InstanceNotFoundException" ]]; then
+          log "failed to get temp attribute on ${queue}"
+          HAVE_JOLOKIA_PROBLEM="true"
+          return
+        else
+          log "queue ${queue} not exist on broker, ignore"
+          continue
+        fi
+      fi
     fi
 
     Is_Temp=$(echo ${R_QueueTemp} | jq -r '.value')
+    log "Is_Temp value: ${Is_Temp}"
 
     if [[ ${Is_Temp} == "false" ]]; then
       log "getting queue ${queue} message count"
 
       R_QueueCount=$(jolokia_read ",address=%22${target_address}%22,component=addresses,queue=%22${queue}%22,routing-type=%22${routingType}%22,subcomponent=queues/MessageCount")
-      if [[ ${CURL_FAILURE} == "${CURL_ERR}" ]]; then
+      log "response: ${R_QueueCount}"
+
+      curl_status=$(echo $R_QueueCount | jq -r '.status')
+      if [[ ${curl_status} != "200" ]]; then
         log "failed to get message count on queue ${queue}"
-        log "response: ${R_QueueCount}"
+        HAVE_JOLOKIA_PROBLEM="true"
         return
       fi
+
       queueMessageCount=$(echo ${R_QueueCount} | jq -r '.value')
       log "message count on ${queue}: ${queueMessageCount}"
 
       TOTAL_MESSAGES_ON_ADDRESS=$((${TOTAL_MESSAGES_ON_ADDRESS} + ${queueMessageCount}))
-    else
+    elif [[ ${Is_Temp} == "true" ]]; then
       log "${queue} is a temp queue, skip"
+    else
+      log "${queue} has a invalid temp attribute value ${Is_Temp}"
+      HAVE_JOLOKIA_PROBLEM="true"
     fi
   done
 }
@@ -82,9 +111,12 @@ function get_total_messages_on_broker() {
   TOTAL_MESSAGES_ON_BROKER=0
 
   RET_VALUE=$(jolokia_read "/AddressNames")
-  if [[ ${CURL_FAILURE} == ${CURL_ERR} ]]; then
+  log "response: ${RET_VALUE}"
+
+  curl_status=$(echo $RET_VALUE | jq -r '.status')
+  if [[ ${curl_status} != "200" ]]; then
     log "failed to get address names from broker ${AMQ_NAME}"
-    log "response: ${RET_VALUE}"
+    HAVE_JOLOKIA_PROBLEM="true"
     return
   fi
 

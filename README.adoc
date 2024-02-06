@@ -2,50 +2,41 @@
 
 NOTE: Extends link:https://github.com/artemiscloud/activemq-artemis-broker-image[ActiveMQ Artemis broker container image]
 
-# License
+## License
 
 See link:LICENSE[LICENSE] file.
 
-## Deploying to minishift
+## How to build
 
-First you want to install minishift https://docs.openshift.org/latest/minishift/getting-started/installing.html.  Start it up and set the environment
-```
-$ minishift start
-$ eval $(minishift oc-env)
-$ eval $(minishift docker-env)
-$ oc login #developer
-```
-Using link:https://docs.cekit.io/en/latest/[Cekit] build the image 
-```
-$ cekit build --build-engine buildah
-```
-Deploy the project. 
-```
-$ oc new-project broker
-$ oc create -n broker -f activemq-artemis-image-streams.yaml
-$ oc process -n broker -f templates/activemq-artemis-basic.yaml -p APPLICATION_NAME=broker-app -p AMQ_USER=<username> -p AMQ_PASSWORD=<amqpassword>  | oc create -n broker -f -
-```
-Push the image.  You will need the ip address of the OpenShift container registry.  You can get this from the image stream in the OpenShift console
-```
-$ docker login -u developer -p $(oc whoami -t) openshift-docker-ip:5000
-$ docker tag artemiscloud/activemq-artemis-broker-openshift:latest openshift-docker-ip:5000/broker/activemq-artemis-broker-openshift:1.0
-$ docker push openshift-docker-ip:5000/broker/activemq-artemis-broker-openshift:1.0
+link:https://docs.cekit.io/en/latest/[CEKit] is used to build the image.
+To build simply run:
+
+```$shell
+cekit build podman
 ```
 
-cekit build docker
- 
-# Repository
+## Repository
 
-The ActiveMQ Artemis broker container images are pushed to https://quay.io/repository/artemiscloud/activemq-artemis-broker-kubernetes
+The ActiveMQ Artemis broker kubernetes container images are pushed to https://quay.io/repository/artemiscloud/activemq-artemis-broker-kubernetes
 
-# Tags
+## Tags
 
-The ActiveMQ Artemis broker container images have release tags and special tags.
+The ActiveMQ Artemis broker kubernetes container images have release tags and special tags.
 
 The image release tags point to images built from the sources of the releated release tags,
 i.e. the `1.0.0` image release tag points to the image built from
-the sources of the [v1.0.0](https://github.com/artemiscloud/activemq-artemis-broker-kubernetes-image/tree/v1.0.0) release tag
+the sources of the link:https://github.com/artemiscloud/activemq-artemis-broker-kubernetes-image/tree/v1.0.0[v1.0.0] release tag
 
-The image special tags are `latest` and `dev-latest`.
-The `latest` tag points to the image built from the sources of the latest release tag.
-The `dev-latest` tag points to the image built from the sources of the main branch, it should be used only for development purposes, it expires 7 days after the push.
+The image special tags are:
+
+- `artemis.ARTEMIS_VERSION` - points to the image built from the sources of a release tag and a specific artemis version. ie: `artemis.2.31.2`
+
+- `latest` - points to the image built from the sources of the latest release tag.
+
+- `dev.DATE.COMMIT_ID` - points to the image built from the sources of the main branch on specific date and commit id, it should be used only for development purposes. ie: `dev.20231110.5cea3ed`. It expires in 3 months
+
+- `dev.latest` - points to the image built from the latest sources of the main branch, it should be used only for development purposes and it is regenerated on each commit on main branch.
+
+- `snapshot` - points to the image built from the latest sources of the main branch and contains the snapshot version of ActiveMQ Artemis
+
+NOTE: Some tags are tied together at some point. We may have the `latest` tag been equal the tag for version `1.0.23` and also equal the tag for `artemis.2.31.2`. The same applies to `dev.latest` tag which will the equal the latest commit tag, ie: `dev.20231110.5cea3ed`

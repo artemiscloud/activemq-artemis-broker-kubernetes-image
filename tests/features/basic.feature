@@ -17,3 +17,12 @@ Feature: Basic
       | AMQ_USER                  | admin |
       | AMQ_PASSWORD              | admin |
     Then file /home/jboss/broker/etc/bootstrap.xml should contain binding sniHostCheck="false" sniRequired="false
+
+  Scenario: Test if JAVA_ARGS_APPEND_INTERNAL is applied
+    When container is started with env
+      | variable                  | value |
+      | AMQ_USER                  | admin |
+      | AMQ_PASSWORD              | admin |
+      | JAVA_ARGS_APPEND          | -Da=b |
+      | JAVA_ARGS_APPEND_INTERNAL | -Dc=d |
+    Then container log should contain updated java append -Da=b -Dc=d

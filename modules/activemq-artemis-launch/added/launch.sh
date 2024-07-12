@@ -316,6 +316,11 @@ function checkBeforeRun() {
       injectMetricsPlugin ${instanceDir}
     fi
   fi
+
+  if [ -n ${JAVA_ARGS_APPEND_INTERNAL} ]; then
+    JAVA_ARGS_APPEND="${JAVA_ARGS_APPEND} ${JAVA_ARGS_APPEND_INTERNAL}"
+    echo "updated java append ${JAVA_ARGS_APPEND}"
+  fi
 }
 
 function selectDelim {

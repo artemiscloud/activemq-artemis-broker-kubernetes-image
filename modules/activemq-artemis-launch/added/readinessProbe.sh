@@ -41,7 +41,7 @@ EVALUATE_SCRIPT=$(cat <<'EOF'
             echo "    ${ACCEPTOR_NAME} does not define a port, cannot check acceptor"
             RESULT=1
         fi
-    done < <(xmlstarlet sel -N c="urn:activemq:core" -t -m "//c:acceptor" -c . -n broker/etc/broker.xml)
+    done < <(xmlstarlet sel -N c="urn:activemq:core" -t -m "//c:acceptor" -c . -n ${CONFIG_FILE})
 
     exit ${RESULT}
 EOF
@@ -68,7 +68,7 @@ while : ; do
     PROBE_MESSAGE="No configuration file located: ${CONFIG_FILE}"
 
     if [ -f "${CONFIG_FILE}" ] ; then
-        bash -c "${EVALUATE_SCRIPT}" >"${OUTPUT}" 2>"${ERROR}"
+        CONFIG_FILE="${CONFIG_FILE}" bash -c "${EVALUATE_SCRIPT}" >"${OUTPUT}" 2>"${ERROR}"
 
         CONNECT_RESULT=$?
         if [ true = "${DEBUG_SCRIPT}" ] ; then

@@ -1,3 +1,7 @@
+#### :warning:This project is now part of the ArkMQ initiative. This repository has been archived as all activities are now happening in the link:https://github.com/arkmq-org/activemq-artemis-broker-kubernetes-image[corresponding ArkMQ repository]. See link:https://artemiscloud.io/community/transition/[here] for the ArkMQ transition details.
+ 
+---
+
 # ActiveMQ Artemis broker Kubernetes container image
 
 NOTE: Extends link:https://github.com/artemiscloud/activemq-artemis-broker-image[ActiveMQ Artemis broker container image]
